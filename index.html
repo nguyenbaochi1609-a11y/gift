@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>流芳·书赠玉笙</title>
+    <style>
+        /* --- 全局设置 --- */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #000;
+            font-family: "KaiTi", "STKaiti", "楷体", serif;
+            user-select: none; /* 禁止选中 */
+        }
+
+        /* --- 鎏金字效 --- */
+        .gilded-text {
+            background: linear-gradient(to right, #e6c885 10%, #ffeb3b 40%, #d4af37 60%, #e6c885 90%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.5)); 
+            font-weight: bold;
+        }
+
+        /* ================= 第一页：婚书 ================= */
+        #page1 {
+            position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #5e0a0a 0%, #3d0606 100%);
+            /* 请确保同目录下有这张图片 */
+            background-image: url('婚书背景图.jpg'); 
+            background-size: cover; 
+            background-position: center;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+            z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            transition: opacity 2s ease-in-out;
+            cursor: pointer; /* 提示可点击 */
+        }
+
+        .border-frame {
+            position: absolute; top: 15px; bottom: 15px; left: 15px; right: 15px;
+            border: 2px solid #d4af37; border-radius: 10px; pointer-events: none; opacity: 0.6;
+        }
+        .border-frame::after {
+            content: ""; position: absolute; top: 5px; bottom: 5px; left: 5px; right: 5px;
+            border: 1px solid #d4af37; border-radius: 5px;
+        }
+
+        /* 标题区 */
+        #title { 
+            font-size: 3.8rem; margin-top: 5%; margin-bottom: 20px; letter-spacing: 10px; 
+        }
+        
+        /* 正文区 */
+        #text-container {
+            width: 80%; height: 60%; 
+            writing-mode: vertical-rl; 
+            font-size: 1.5rem; line-height: 2.8rem; letter-spacing: 0.4rem; 
+            text-align: left; display: flex; flex-wrap: wrap; align-content: center;
+        }
+
+        .line { opacity: 0; transition: opacity 1.5s ease; margin-left: 12px; }
+
+        /* 签名区 */
+        #sign-section {
+            width: 95%; position: absolute; bottom: 5%; 
+            display: none; flex-direction: column; align-items: center; z-index: 20;
+        }
+        .sign-box-container { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; box-sizing: border-box; }
+        .sign-box { width: 42%; display: flex; flex-direction: column; align-items: center; }
+        
+        .canvas-wrap {
+            width: 100%; height: 80px; 
+            background-color: transparent; border-bottom: 3px solid #d4af37; 
+        }
+        canvas { width: 100%; height: 100%; cursor: crosshair; }
+        .sign-label { margin-top: 5px; font-size: 1.0rem; opacity: 0.9; }
+
+        /* ================= 第二页：粒子爱心 (Canvas) ================= */
+        #page2 {
+            position: absolute; width: 100%; height: 100%;
+            background: #000; display: none; z-index: 5; overflow: hidden;
+        }
+
+        /* 爱心画布 */
+        #heart-canvas {
+            position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+            z-index: 1; 
+        }
+
+        /* 情话容器 (浮在画布之上) */
+        #words-container { 
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; 
+            z-index: 10; 
+            pointer-events: none; 
+        }
+        
+        .floating-word {
+            position: absolute; color: #fff; font-size: 1.1rem; 
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            white-space: nowrap; 
+            animation: textPop 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
+            opacity: 0;
+            font-family: "KaiTi";
+        }
+        
+        /* 透明样式：用于遮挡爱心的文字 */
+        .semi-transparent { 
+            opacity: 0.1 !important; /* 极度透明 */
+            text-shadow: none; 
+        }
+        
+        @keyframes textPop { 
+            0% { opacity: 0; transform: scale(0); } 
+            60% { opacity: 1; transform: scale(1.1); } 
+            100% { opacity: 1; transform: scale(1); } 
+        }
+
+        /* ================= 第三页：求签 (白色背景) ================= */
+        #page3 {
+            position: absolute; width: 100%; height: 100%;
+            background-color: #f5f5f0; /* 柔和的米白背景 */
+            display: none; z-index: 6;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* 签筒容器 */
+        #lot-container {
+            position: relative; 
+            /* 【在这里调整签筒大小】 */
+            width: 160px;  /* 宽度 */
+            height: 300px; /* 高度 */
+            
+            margin-top: 80px; cursor: pointer;
+        }
+
+        /* 签筒主体 */
+        .cylinder-body {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; 
+            background: linear-gradient(90deg, #5c4033 0%, #8b5a2b 40%, #5c4033 100%);
+            border-radius: 10px 10px 30px 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+        }
+        /* 签筒上的“签”字装饰 */
+        .cylinder-text {
+            writing-mode: vertical-rl; font-size: 3rem; color: #3e2723;
+            font-family: "KaiTi"; opacity: 0.7; letter-spacing: 10px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            border: 2px solid #3e2723; padding: 10px 5px;
+        }
+
+        /* 签条 */
+        #stick {
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+            width: 25%; /* 签条宽度相对于筒宽 */
+            height: 85%; /* 签条高度 */
+            
+            /* 淡黄色竹纹样式 */
+            background: linear-gradient(90deg, #e0c38c 0%, #f5deb3 50%, #e0c38c 100%);
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px);
+            
+            border: 1px solid #d2b48c; border-radius: 5px 5px 0 0;
+            z-index: 5; /* 在筒后面 */
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 签文文字容器 (修复版) */
+        #stick-text {
+            writing-mode: vertical-rl; /* 竖排文字 */
+            
+            display: flex;             
+            flex-direction: column;    
+            flex-wrap: wrap;           
+            align-items: center;       /* 左右居中 */
+            justify-content: center;   /* 上下居中 */
+            gap: 5px;                  /* 两行诗之间的间距 (调小) */
+            
+            /* 字体设置 (调小以适应7言诗) */
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            letter-spacing: 2px;       /* 缩小字间距 */
+            
+            opacity: 0; 
+            transition: opacity 0.5s;
+            height: 90%; 
+            width: 100%;               
+            
+            color: #2b1b17; 
+            font-family: "KaiTi", "STKaiti", "楷体", serif;
+            text-shadow: 0 0 1px rgba(0,0,0,0.1);
+        }
+        
+        /* 诗句单行样式 */
+        .poem-line {
+            display: block;
+            white-space: nowrap; 
+        }
+
+        /* 动画类 */
+        .shake-anim { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        .stick-rise { transform: translateX(-50%) translateY(-60%) !important; } 
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div id="page1" onclick="startAutoReveal()">
+        <div class="border-frame"></div>
+        <div id="title" class="gilded-text" style="writing-mode: horizontal-tb;">婚 书</div>
+
+        <div id="text-container">
+            <p id="line1" class="line gilded-text">两姓联姻，一堂缔约</p>
+            <p id="line2" class="line gilded-text">良缘永结，匹配同称</p>
+            <p id="line3" class="line gilded-text">看此日桃花灼灼</p>
+            <p id="line4" class="line gilded-text">宜室宜家</p>
+            <p id="line5" class="line gilded-text">卜他年瓜瓞绵绵</p>
+            <p id="line6" class="line gilded-text">尔昌尔炽</p>
+            <p id="line7" class="line gilded-text">谨以白头之约</p>
+            <p id="line8" class="line gilded-text">书向鸿笺</p>
+            <p id="line9" class="line gilded-text">好将红叶之盟</p>
+            <p id="line10" class="line gilded-text">载明鸳谱</p>
+        </div>
+
+        <div id="sign-section">
+            <div class="sign-box-container">
+                <div class="sign-box">
+                    <div class="canvas-wrap"><canvas id="canvasFang"></canvas></div>
+                    <div class="sign-label gilded-text">新郎 落款</div>
+                </div>
+                <div class="sign-box">
+                    <div class="canvas-wrap"><canvas id="canvasYang"></canvas></div>
+                    <div class="sign-label gilded-text">新娘 落款</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page2">
+        <canvas id="heart-canvas"></canvas>
+        <div id="words-container"></div>
+    </div>
+
+    <div id="page3">
+        <div id="lot-container" onclick="drawLot()">
+            <div id="stick"><span id="stick-text"></span></div>
+            <div class="cylinder-body">
+                <div class="cylinder-text">求签</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================= 【配置区域】 ================= */
+        
+        // 1. 第一次求签结果
+        const FIRST_FORTUNE = "所愿皆所成"; 
+
+        // 2. 之后求签的随机库
+        const RANDOM_FORTUNES = [
+            "前程似锦", 
+            "万事胜意", 
+            "志得意满", 
+            "意气风发",
+            "平安喜乐",
+            // 诗句 (会自动分两行)
+            "彩笔题桐叶，佳句问平安",
+            "身无彩凤双飞翼，心有灵犀一点通",
+            "愿我如星君如月，夜夜流光相皎洁",
+            "一名从此始，相望青云端"
+        ];
+
+        /* ============================================================= */
+
+        // --- 1. 婚书逻辑 ---
+        let currentLine = 1;
+        const totalLines = 10;
+        let revealState = 0; // 0:未开始, 1:正在展示, 2:已完成
+        let revealInterval;
+
+        function startAutoReveal() {
+            if (revealState === 2) return;
+
+            if (revealState === 0) {
+                // 第一次点击
+                revealState = 1;
+                revealInterval = setInterval(() => {
+                    if (currentLine <= totalLines) {
+                        document.getElementById('line' + currentLine).style.opacity = 1;
+                        currentLine++;
+                    } else {
+                        finishReveal();
+                    }
+                }, 800); 
+            } else if (revealState === 1) {
+                // 第二次点击：直接显示
+                clearInterval(revealInterval);
+                for (let i = 1; i <= totalLines; i++) {
+                    document.getElementById('line' + i).style.opacity = 1;
+                }
+                currentLine = totalLines + 1;
+                finishReveal();
+            }
+        }
+
+        function finishReveal() {
+            revealState = 2;
+            clearInterval(revealInterval);
+            setTimeout(() => {
+                document.getElementById('sign-section').style.display = 'flex';
+                initCanvas('canvasFang', 'fang');
+                initCanvas('canvasYang', 'yang');
+                document.getElementById('page1').onclick = null;
+            }, 500);
+        }
+
+        // --- 2. 签名逻辑 ---
+        let fangSigned = false;
+        let yangSigned = false;
+        let signOrder = []; 
+
+        function initCanvas(canvasId, userType) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width; canvas.height = rect.height;
+
+            ctx.lineWidth = 3; ctx.strokeStyle = "#d4af37"; ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+            let isDrawing = false; let hasMoved = false;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            const start = (e) => {
+                isDrawing = true; hasMoved = false;
+                ctx.beginPath(); const pos = getPos(e); ctx.moveTo(pos.x, pos.y);
+                if(e.type !== 'mousedown') e.preventDefault();
+            };
+
+            const move = (e) => {
+                if (!isDrawing) return; hasMoved = true;
+                const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+                if(e.type !== 'mousemove') e.preventDefault();
+            };
+
+            const end = () => {
+                if (isDrawing && hasMoved) {
+                    if (userType === 'fang') fangSigned = true;
+                    if (userType === 'yang') yangSigned = true;
+                    if (!signOrder.includes(userType)) signOrder.push(userType);
+                    checkFinish();
+                }
+                isDrawing = false;
+            };
+
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchmove', move, {passive: false});
+            canvas.addEventListener('touchend', end);
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', end);
+            canvas.addEventListener('mouseleave', end);
+        }
+
+        // --- 3. 结局分支判定 ---
+        function checkFinish() {
+            if (fangSigned && yangSigned) {
+                setTimeout(() => {
+                    const p1 = document.getElementById('page1');
+                    p1.style.opacity = 0; 
+                    setTimeout(() => {
+                        p1.style.display = 'none';
+                        if (signOrder[0] === 'yang') {
+                            // 结局 A: 求签
+                            const p3 = document.getElementById('page3');
+                            p3.style.display = 'flex'; 
+                        } else {
+                            // 结局 B: 爱心
+                            const p2 = document.getElementById('page2');
+                            p2.style.display = 'block';
+                            initParticleHeart(); 
+                            startRomanticExplosion(); 
+                        }
+                    }, 2000); 
+                }, 2000); 
+            }
+        }
+
+        // --- 4. 求签逻辑 (修复版：去除了会导致大间距的 margin) ---
+        let hasDrawn = false; 
+        let isAnimating = false;
+
+        function drawLot() {
+            if (isAnimating) return; 
+            isAnimating = true;
+
+            const container = document.getElementById('lot-container');
+            const stick = document.getElementById('stick');
+            const textEl = document.getElementById('stick-text');
+
+            // 重置
+            stick.classList.remove('stick-rise');
+            textEl.style.opacity = 0;
+            textEl.innerHTML = ""; // 清空内容
+            
+            // 摇晃
+            container.classList.add('shake-anim');
+
+            setTimeout(() => {
+                container.classList.remove('shake-anim');
+                
+                // 获取文案
+                let resultText = !hasDrawn ? FIRST_FORTUNE : RANDOM_FORTUNES[Math.floor(Math.random() * RANDOM_FORTUNES.length)];
+                if (!hasDrawn) hasDrawn = true;
+                
+                // === 核心逻辑：检测逗号并拆分 ===
+                if (resultText.includes("，") || resultText.includes(",")) {
+                    // 有逗号，拆分
+                    const parts = resultText.split(/，|,/); 
+                    if (parts.length >= 2) {
+                        // 动态调整字号，如果字数多就小一点
+                        if(parts[0].length > 5 || parts[1].length > 5) {
+                            textEl.style.fontSize = "0.85rem"; 
+                        } else {
+                            textEl.style.fontSize = "0.95rem";
+                        }
+                        // 插入HTML，注意这里去掉了之前的 margin-top
+                        textEl.innerHTML = `<span class="poem-line">${parts[0]}</span><span class="poem-line">${parts[1]}</span>`;
+                    } else {
+                        textEl.style.fontSize = "1.2rem";
+                        textEl.innerText = resultText;
+                    }
+                } else {
+                    // 无逗号，普通短语
+                    textEl.style.fontSize = "1.3rem";
+                    textEl.innerText = resultText;
+                }
+                // ==============================
+
+                stick.classList.add('stick-rise');
+                
+                setTimeout(() => {
+                    textEl.style.opacity = 1;
+                    isAnimating = false; 
+                }, 500);
+            }, 1000); 
+        }
+
+        // --- 5. 粒子爱心引擎 ---
+        function initParticleHeart() {
+            var canvas = document.getElementById('heart-canvas');
+            var ctx = canvas.getContext('2d');
+            
+            var mobile = (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(((navigator.userAgent || navigator.vendor || window.opera)).toLowerCase()));
+            var koef = mobile ? 1.0 : 1.0; 
+            
+            var width = canvas.width = koef * window.innerWidth;
+            var height = canvas.height = koef * window.innerHeight;
+            
+            var rand = Math.random;
+            
+            var heartPosition = function (rad) {
+                return [Math.pow(Math.sin(rad), 3), -(15 * Math.cos(rad) - 5 * Math.cos(2 * rad) - 2 * Math.cos(3 * rad) - Math.cos(4 * rad))];
+            };
+            
+            var scaleAndTranslate = function (pos, sx, sy, dx, dy) {
+                return [dx + pos[0] * sx, dy + pos[1] * sy];
+            };
+
+            window.addEventListener('resize', function () {
+                width = canvas.width = koef * window.innerWidth;
+                height = canvas.height = koef * window.innerHeight;
+            });
+
+            var traceCount = mobile ? 20 : 50;
+            var pointsOrigin = [];
+            var i;
+            var dr = mobile ? 0.3 : 0.1;
+            
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 210, 13, 0, 0));
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 150, 9, 0, 0));
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 90, 5, 0, 0));
+            
+            var heartPointsCount = pointsOrigin.length;
+            var targetPoints = [];
+            
+            var pulse = function (kx, ky) {
+                for (i = 0; i < pointsOrigin.length; i++) {
+                    targetPoints[i] = [];
+                    targetPoints[i][0] = kx * pointsOrigin[i][0] + width / 2;
+                    targetPoints[i][1] = ky * pointsOrigin[i][1] + height / 2;
+                }
+            };
+
+            var e = [];
+            for (i = 0; i < heartPointsCount; i++) {
+                var x = rand() * width;
+                var y = rand() * height;
+                e[i] = {
+                    vx: 0, vy: 0, R: 2, speed: rand() + 5,
+                    q: ~~(rand() * heartPointsCount),
+                    D: 2 * (i % 2) - 1,
+                    force: 0.2 * rand() + 0.7,
+                    f: "hsla(0," + ~~(40 * rand() + 60) + "%," + ~~(60 * rand() + 20) + "%,.3)",
+                    trace: []
+                };
+                for (var k = 0; k < traceCount; k++) e[i].trace[k] = {x: x, y: y};
+            }
+
+            var config = { traceK: 0.4, timeDelta: 0.01 };
+            var time = 0;
+
+            var loop = function () {
+                var n = -Math.cos(time);
+                pulse((1 + n) * .5, (1 + n) * .5);
+                time += ((Math.sin(time)) < 0 ? 9 : (n > 0.8) ? .2 : 1) * config.timeDelta;
+                
+                ctx.fillStyle = "rgba(0,0,0,.1)"; 
+                ctx.fillRect(0, 0, width, height);
+                
+                for (i = e.length; i--;) {
+                    var u = e[i];
+                    var q = targetPoints[u.q];
+                    var dx = u.trace[0].x - q[0];
+                    var dy = u.trace[0].y - q[1];
+                    var length = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (10 > length) {
+                        if (0.95 < rand()) {
+                            u.q = ~~(rand() * heartPointsCount);
+                        } else {
+                            if (0.99 < rand()) { u.D *= -1; }
+                            u.q += u.D;
+                            u.q %= heartPointsCount;
+                            if (0 > u.q) { u.q += heartPointsCount; }
+                        }
+                    }
+                    u.vx += -dx / length * u.speed;
+                    u.vy += -dy / length * u.speed;
+                    u.trace[0].x += u.vx;
+                    u.trace[0].y += u.vy;
+                    u.vx *= u.force;
+                    u.vy *= u.force;
+                    
+                    for (k = 0; k < u.trace.length - 1;) {
+                        var T = u.trace[k];
+                        var N = u.trace[++k];
+                        N.x -= config.traceK * (N.x - T.x);
+                        N.y -= config.traceK * (N.y - T.y);
+                    }
+                    ctx.fillStyle = u.f;
+                    for (k = 0; k < u.trace.length; k++) {
+                        ctx.fillRect(u.trace[k].x, u.trace[k].y, 1, 1);
+                    }
+                }
+                requestAnimationFrame(loop);
+            };
+            loop();
+        }
+
+        // --- 6. 情话弹幕逻辑 ---
+        const loveWords = [
+            "所愿皆所成"
+        ];
+        
+        function startRomanticExplosion() {
+            const container = document.getElementById('words-container');
+            let count = 0;
+            const maxWords = 150; 
+
+            const interval = setInterval(() => {
+                if (count >= maxWords) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                const wordEl = document.createElement('span');
+                wordEl.classList.add('floating-word');
+                wordEl.innerText = loveWords[0]; 
+
+                const randomTop = Math.random() * 95;
+                const randomLeft = Math.random() * 90;
+
+                // 防遮挡检测
+                if (randomTop > 20 && randomTop < 80 && randomLeft > 20 && randomLeft < 80) {
+                    wordEl.classList.add('semi-transparent');
+                }
+
+                wordEl.style.top = randomTop + '%';
+                wordEl.style.left = randomLeft + '%';
+                wordEl.style.fontSize = (0.8 + Math.random() * 1.0) + 'rem';
+                
+                container.appendChild(wordEl);
+                count++;
+
+            }, 200); 
+        }
+    </script>
+</body>
+</html>
