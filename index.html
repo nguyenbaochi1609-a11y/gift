@@ -290,11 +290,12 @@
             "前程似锦", 
             "万事胜意", 
             "志得意满", 
-            "愿我如星君如月，夜夜流光相皎洁",
-            "愿君千万岁，无岁不逢春",
+            "意气风发",
+            "愿君千万岁，无岁不逢春"
+            "天保定尔，俾尔戬穀。罄无不宜，受天百禄",
             "彩笔题桐叶，佳句问平安",
-            "天保定尔，俾尔戬穀 罄无不宜，受天百禄",
             "知君志不小，一举凌鸿鹄",
+            "愿我如星君如月，夜夜流光相皎洁",
             "一鸣从此始，相望青云端"
         ];
 
@@ -339,7 +340,7 @@
             }, 500);
         }
 
-        // --- 2. 签名逻辑 (优化：适配移动端触摸) ---
+        // --- 2. 签名逻辑 (硬核防误触 + 移动端适配) ---
         let fangSigned = false;
         let yangSigned = false;
         let signOrder = []; 
@@ -348,7 +349,7 @@
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             
-            // 【核心优化】：解决移动端 Canvas 模糊问题
+            // 解决移动端 Canvas 模糊问题
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.parentElement.getBoundingClientRect();
             canvas.width = rect.width * dpr;
@@ -362,7 +363,8 @@
             ctx.lineCap = "round"; 
             ctx.lineJoin = "round";
 
-            let isDrawing = false; let hasMoved = false;
+            let isDrawing = false; 
+            let strokePoints = 0; // 【核心防误触】记录笔画点数
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
@@ -371,23 +373,25 @@
                 return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
-            // 统一事件处理，防止默认滚动
             const start = (e) => {
-                isDrawing = true; hasMoved = false;
+                isDrawing = true; 
+                strokePoints = 0; // 每次下笔重置计数
                 const pos = getPos(e);
                 ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-                if(e.type !== 'mousedown') ; // 允许点击
+                if(e.type !== 'mousedown') ; 
             };
 
             const move = (e) => {
-                if (!isDrawing) return; hasMoved = true;
+                if (!isDrawing) return; 
+                strokePoints++; // 【核心防误触】开始计数
                 const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
-                // 阻止触摸滑动页面
                 if(e.cancelable) e.preventDefault(); 
             };
 
             const end = () => {
-                if (isDrawing && hasMoved) {
+                // 【核心防误触】只有当连续移动了超过 20 个点时，才算真正签了名
+                // 这样如果不小心碰了一下（strokePoints 大概是 0-5），就不会触发
+                if (isDrawing && strokePoints > 20) {
                     if (userType === 'fang') fangSigned = true;
                     if (userType === 'yang') yangSigned = true;
                     if (!signOrder.includes(userType)) signOrder.push(userType);
@@ -405,9 +409,11 @@
             canvas.addEventListener('mouseleave', end);
         }
 
-        // --- 3. 结局分支判定 ---
+        // --- 3. 结局分支判定 (延时优化版) ---
         function checkFinish() {
             if (fangSigned && yangSigned) {
+                // 【核心修改】这里设置等待 5000 毫秒（5秒）再开始跳转
+                // 给你足够的时间欣赏双签
                 setTimeout(() => {
                     const p1 = document.getElementById('page1');
                     p1.style.opacity = 0; 
@@ -422,8 +428,8 @@
                             initParticleHeart(); 
                             startRomanticExplosion(); 
                         }
-                    }, 2000); 
-                }, 2000); 
+                    }, 2000); // 这是淡出动画的时间
+                }, 5000); // <--- 这里就是 5 秒等待时间
             }
         }
 
@@ -453,7 +459,6 @@
                 if (resultText.includes("，") || resultText.includes(",")) {
                     const parts = resultText.split(/，|,/); 
                     if (parts.length >= 2) {
-                        // 智能字号：根据屏幕大小动态计算，避免溢出
                         const baseSize = window.innerWidth < 500 ? 2.0 : 2.2; 
                         textEl.style.fontSize = baseSize + "vmin"; 
                         textEl.innerHTML = `<span class="poem-line">${parts[0]}</span><span class="poem-line">${parts[1]}</span>`;
@@ -480,9 +485,8 @@
             var canvas = document.getElementById('heart-canvas');
             var ctx = canvas.getContext('2d');
             
-            // 解决Canvas模糊，使用设备像素比
+            // 解决Canvas模糊
             var dpr = window.devicePixelRatio || 1;
-            
             var width, height;
             
             var resize = function() {
@@ -505,15 +509,13 @@
                 return [dx + pos[0] * sx, dy + pos[1] * sy];
             };
 
-            // 移动端粒子数量优化
             var mobile = width < 600;
             var traceCount = mobile ? 20 : 50;
             var pointsOrigin = [];
             var i;
             var dr = mobile ? 0.3 : 0.1;
             
-            // 缩放系数调整：保证爱心在屏幕中间且大小合适
-            var heartScale = Math.min(width, height) / 800; // 动态计算缩放
+            var heartScale = Math.min(width, height) / 800; 
             var sx = 210 * heartScale; 
             var sy = 13 * heartScale;
 
@@ -616,7 +618,6 @@
                 wordEl.classList.add('floating-word');
                 wordEl.innerText = loveWords[0]; 
 
-                // 随机位置使用百分比，适配所有屏幕
                 const randomTop = Math.random() * 95;
                 const randomLeft = Math.random() * 90;
 
@@ -627,7 +628,6 @@
 
                 wordEl.style.top = randomTop + '%';
                 wordEl.style.left = randomLeft + '%';
-                // 字体大小也使用动态计算
                 wordEl.style.fontSize = (Math.random() * 2 + 1.5) + 'vmin';
                 
                 container.appendChild(wordEl);
