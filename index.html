@@ -11,6 +11,8 @@
             overflow: hidden; background-color: #000;
             font-family: "KaiTi", "STKaiti", "楷体", serif;
             user-select: none; /* 禁止选中 */
+            /* 禁止iOS点击高亮 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- 鎏金字效 --- */
@@ -21,81 +23,122 @@
             font-weight: bold;
         }
 
-        /* ================= 第一页：婚书 ================= */
+        /* ================= 第一页：婚书 (智能缩放版) ================= */
         #page1 {
             position: absolute; width: 100%; height: 100%;
+            /* 保持背景充满屏幕，可能部分被裁剪，但保证美观 */
             background: linear-gradient(135deg, #5e0a0a 0%, #3d0606 100%);
-            /* 请确保同目录下有这张图片 */
             background-image: url('婚书背景图.jpg'); 
             background-size: cover; 
             background-position: center;
             box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
             z-index: 10;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            
+            /* Flex 居中布局，确保内容永远在正中间 */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; /* 内容从上往下排 */
+            
             transition: opacity 2s ease-in-out;
-            cursor: pointer; /* 提示可点击 */
+            cursor: pointer;
         }
 
+        /* 边框：使用 vmin 保证比例 */
         .border-frame {
-            position: absolute; top: 15px; bottom: 15px; left: 15px; right: 15px;
-            border: 2px solid #d4af37; border-radius: 10px; pointer-events: none; opacity: 0.6;
+            position: absolute; 
+            top: 3vmin; bottom: 3vmin; left: 3vmin; right: 3vmin;
+            border: 0.4vmin solid #d4af37; /* 线条粗细也随屏幕缩放 */
+            border-radius: 2vmin; 
+            pointer-events: none; opacity: 0.6;
         }
         .border-frame::after {
-            content: ""; position: absolute; top: 5px; bottom: 5px; left: 5px; right: 5px;
-            border: 1px solid #d4af37; border-radius: 5px;
+            content: ""; position: absolute; 
+            top: 1vmin; bottom: 1vmin; left: 1vmin; right: 1vmin;
+            border: 0.2vmin solid #d4af37; 
+            border-radius: 1vmin;
         }
 
-        /* 标题区 */
+        /* 标题区：使用 vmin 控制字号 */
         #title { 
-            font-size: 3.8rem; margin-top: 5%; margin-bottom: 20px; letter-spacing: 10px; 
+            /* 智能字号：屏幕宽高中较小边的 10% */
+            font-size: 10vmin; 
+            margin-top: 8vh; /* 距离顶部 8% 视口高度 */
+            margin-bottom: 2vh; 
+            letter-spacing: 2vmin; 
         }
         
-        /* 正文区 */
+        /* 正文区：核心布局调整 */
         #text-container {
-            width: 80%; height: 60%; 
-            writing-mode: vertical-rl; 
-            font-size: 1.5rem; line-height: 2.8rem; letter-spacing: 0.4rem; 
-            text-align: left; display: flex; flex-wrap: wrap; align-content: center;
+            /* 宽度和高度都基于视口，保证在任何设备都不溢出 */
+            width: 85vw; 
+            height: 60vh; 
+            
+            writing-mode: vertical-rl; /* 竖排文字 */
+            
+            /* 字体大小使用 vmin，手机上也不会太大 */
+            font-size: 3.5vmin; 
+            line-height: 6vmin; /* 行距 */
+            letter-spacing: 0.8vmin; /* 字距 */
+            
+            text-align: left; 
+            display: flex; 
+            flex-wrap: wrap; 
+            align-content: center; /* 整体居中 */
+            justify-content: center;
         }
 
-        .line { opacity: 0; transition: opacity 1.5s ease; margin-left: 12px; }
+        .line { opacity: 0; transition: opacity 1.5s ease; margin-left: 1.5vmin; }
 
         /* 签名区 */
         #sign-section {
-            width: 95%; position: absolute; bottom: 5%; 
-            display: none; flex-direction: column; align-items: center; z-index: 20;
+            width: 90%; 
+            position: absolute; 
+            bottom: 5vh; /* 距离底部 5% */
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            z-index: 20;
         }
-        .sign-box-container { display: flex; justify-content: space-between; width: 100%; padding: 0 20px; box-sizing: border-box; }
-        .sign-box { width: 42%; display: flex; flex-direction: column; align-items: center; }
+        .sign-box-container { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 100%; 
+            max-width: 800px; /* 限制最大宽度，防止电脑上太开 */
+            padding: 0 2vmin; 
+            box-sizing: border-box; 
+        }
+        .sign-box { width: 45%; display: flex; flex-direction: column; align-items: center; }
         
         .canvas-wrap {
-            width: 100%; height: 80px; 
-            background-color: transparent; border-bottom: 3px solid #d4af37; 
+            width: 100%; 
+            height: 12vmin; /* 签名区域高度随屏幕变 */
+            min-height: 60px; /* 最小高度保底 */
+            background-color: transparent; 
+            border-bottom: 0.4vmin solid #d4af37; 
         }
         canvas { width: 100%; height: 100%; cursor: crosshair; }
-        .sign-label { margin-top: 5px; font-size: 1.0rem; opacity: 0.9; }
+        .sign-label { margin-top: 1vmin; font-size: 2.5vmin; opacity: 0.9; }
 
-        /* ================= 第二页：粒子爱心 (Canvas) ================= */
+        /* ================= 第二页：粒子爱心 ================= */
         #page2 {
             position: absolute; width: 100%; height: 100%;
             background: #000; display: none; z-index: 5; overflow: hidden;
         }
 
-        /* 爱心画布 */
         #heart-canvas {
             position: absolute; left: 0; top: 0; width: 100%; height: 100%;
             z-index: 1; 
         }
 
-        /* 情话容器 (浮在画布之上) */
         #words-container { 
             position: absolute; width: 100%; height: 100%; top: 0; left: 0; 
-            z-index: 10; 
-            pointer-events: none; 
+            z-index: 10; pointer-events: none; 
         }
         
         .floating-word {
-            position: absolute; color: #fff; font-size: 1.1rem; 
+            position: absolute; color: #fff; 
+            font-size: 3vmin; /* 弹幕文字大小也随屏幕缩放 */
             text-shadow: 0 0 5px rgba(255,255,255,0.5);
             white-space: nowrap; 
             animation: textPop 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
@@ -103,11 +146,7 @@
             font-family: "KaiTi";
         }
         
-        /* 透明样式：用于遮挡爱心的文字 */
-        .semi-transparent { 
-            opacity: 0.1 !important; /* 极度透明 */
-            text-shadow: none; 
-        }
+        .semi-transparent { opacity: 0.1 !important; text-shadow: none; }
         
         @keyframes textPop { 
             0% { opacity: 0; transform: scale(0); } 
@@ -115,91 +154,76 @@
             100% { opacity: 1; transform: scale(1); } 
         }
 
-        /* ================= 第三页：求签 (白色背景) ================= */
+        /* ================= 第三页：求签 (智能缩放版) ================= */
         #page3 {
             position: absolute; width: 100%; height: 100%;
-            background-color: #f5f5f0; /* 柔和的米白背景 */
+            background-color: #f5f5f0; 
             display: none; z-index: 6;
             flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* 签筒容器 */
+        /* 签筒容器：使用 vmin 控制整体大小 */
         #lot-container {
             position: relative; 
-            /* 【在这里调整签筒大小】 */
-            width: 160px;  /* 宽度 */
-            height: 300px; /* 高度 */
+            /* 【核心修改】：不使用 px，使用 vmin */
+            /* 这样在 iPad (方屏) 和 手机 (长屏) 都能保持合适比例 */
+            width: 30vmin;  
+            height: 56vmin; 
             
-            margin-top: 80px; cursor: pointer;
+            margin-top: 5vmin; 
+            cursor: pointer;
         }
 
-        /* 签筒主体 */
         .cylinder-body {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; 
             background: linear-gradient(90deg, #5c4033 0%, #8b5a2b 40%, #5c4033 100%);
-            border-radius: 10px 10px 30px 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-radius: 2vmin 2vmin 6vmin 6vmin;
+            box-shadow: 0 2vmin 4vmin rgba(0,0,0,0.3);
             z-index: 10;
             display: flex; align-items: center; justify-content: center;
         }
-        /* 签筒上的“签”字装饰 */
+        
         .cylinder-text {
-            writing-mode: vertical-rl; font-size: 3rem; color: #3e2723;
-            font-family: "KaiTi"; opacity: 0.7; letter-spacing: 10px;
+            writing-mode: vertical-rl; 
+            font-size: 8vmin; /* 字体随容器缩放 */
+            color: #3e2723;
+            font-family: "KaiTi"; opacity: 0.7; 
+            letter-spacing: 2vmin;
             text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
-            border: 2px solid #3e2723; padding: 10px 5px;
+            border: 0.4vmin solid #3e2723; 
+            padding: 2vmin 1vmin;
         }
 
-        /* 签条 */
         #stick {
-            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-            width: 25%; /* 签条宽度相对于筒宽 */
-            height: 85%; /* 签条高度 */
-            
-            /* 淡黄色竹纹样式 */
+            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
+            width: 28%; /* 相对筒宽 */
+            height: 85%; 
             background: linear-gradient(90deg, #e0c38c 0%, #f5deb3 50%, #e0c38c 100%);
             background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px);
-            
-            border: 1px solid #d2b48c; border-radius: 5px 5px 0 0;
-            z-index: 5; /* 在筒后面 */
+            border: 1px solid #d2b48c; border-radius: 1vmin 1vmin 0 0;
+            z-index: 5; 
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0.5vmin 0.5vmin 1vmin rgba(0,0,0,0.1);
             transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 签文文字容器 (修复版) */
         #stick-text {
-            writing-mode: vertical-rl; /* 竖排文字 */
+            writing-mode: vertical-rl; 
+            display: flex; flex-direction: column; flex-wrap: wrap; 
+            align-items: center; justify-content: center; 
+            gap: 1vmin; /* 行间距 */
             
-            display: flex;             
-            flex-direction: column;    
-            flex-wrap: wrap;           
-            align-items: center;       /* 左右居中 */
-            justify-content: center;   /* 上下居中 */
-            gap: 5px;                  /* 两行诗之间的间距 (调小) */
-            
-            /* 字体设置 (调小以适应7言诗) */
-            font-size: 0.9rem; 
+            /* 字体动态调整 */
+            font-size: 2.2vmin; 
             font-weight: bold; 
-            letter-spacing: 2px;       /* 缩小字间距 */
+            letter-spacing: 0.5vmin; 
             
-            opacity: 0; 
-            transition: opacity 0.5s;
-            height: 90%; 
-            width: 100%;               
-            
-            color: #2b1b17; 
-            font-family: "KaiTi", "STKaiti", "楷体", serif;
-            text-shadow: 0 0 1px rgba(0,0,0,0.1);
+            opacity: 0; transition: opacity 0.5s;
+            height: 90%; width: 100%; 
+            color: #2b1b17; font-family: "KaiTi";
         }
         
-        /* 诗句单行样式 */
-        .poem-line {
-            display: block;
-            white-space: nowrap; 
-        }
-
-        /* 动画类 */
+        .poem-line { display: block; white-space: nowrap; }
         .shake-anim { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
         .stick-rise { transform: translateX(-50%) translateY(-60%) !important; } 
 
@@ -261,22 +285,17 @@
 
     <script>
         /* ================= 【配置区域】 ================= */
-        
-        // 1. 第一次求签结果
         const FIRST_FORTUNE = "所愿皆所成"; 
-
-        // 2. 之后求签的随机库
         const RANDOM_FORTUNES = [
             "前程似锦", 
             "万事胜意", 
             "志得意满", 
-            "意气风发",
-            "平安喜乐",
-            // 诗句 (会自动分两行)
-            "彩笔题桐叶，佳句问平安",
-            "身无彩凤双飞翼，心有灵犀一点通",
             "愿我如星君如月，夜夜流光相皎洁",
-            "一名从此始，相望青云端"
+            "愿君千万岁，无岁不逢春",
+            "彩笔题桐叶，佳句问平安",
+            "天保定尔，俾尔戬穀 罄无不宜，受天百禄",
+            "知君志不小，一举凌鸿鹄",
+            "一鸣从此始，相望青云端"
         ];
 
         /* ============================================================= */
@@ -284,14 +303,12 @@
         // --- 1. 婚书逻辑 ---
         let currentLine = 1;
         const totalLines = 10;
-        let revealState = 0; // 0:未开始, 1:正在展示, 2:已完成
+        let revealState = 0; 
         let revealInterval;
 
         function startAutoReveal() {
             if (revealState === 2) return;
-
             if (revealState === 0) {
-                // 第一次点击
                 revealState = 1;
                 revealInterval = setInterval(() => {
                     if (currentLine <= totalLines) {
@@ -302,7 +319,6 @@
                     }
                 }, 800); 
             } else if (revealState === 1) {
-                // 第二次点击：直接显示
                 clearInterval(revealInterval);
                 for (let i = 1; i <= totalLines; i++) {
                     document.getElementById('line' + i).style.opacity = 1;
@@ -323,7 +339,7 @@
             }, 500);
         }
 
-        // --- 2. 签名逻辑 ---
+        // --- 2. 签名逻辑 (优化：适配移动端触摸) ---
         let fangSigned = false;
         let yangSigned = false;
         let signOrder = []; 
@@ -331,10 +347,20 @@
         function initCanvas(canvasId, userType) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
+            
+            // 【核心优化】：解决移动端 Canvas 模糊问题
+            const dpr = window.devicePixelRatio || 1;
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width; canvas.height = rect.height;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = rect.width + "px";
+            canvas.style.height = rect.height + "px";
 
-            ctx.lineWidth = 3; ctx.strokeStyle = "#d4af37"; ctx.lineCap = "round"; ctx.lineJoin = "round";
+            ctx.lineWidth = 3; 
+            ctx.strokeStyle = "#d4af37"; 
+            ctx.lineCap = "round"; 
+            ctx.lineJoin = "round";
 
             let isDrawing = false; let hasMoved = false;
 
@@ -345,16 +371,19 @@
                 return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
+            // 统一事件处理，防止默认滚动
             const start = (e) => {
                 isDrawing = true; hasMoved = false;
-                ctx.beginPath(); const pos = getPos(e); ctx.moveTo(pos.x, pos.y);
-                if(e.type !== 'mousedown') e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+                if(e.type !== 'mousedown') ; // 允许点击
             };
 
             const move = (e) => {
                 if (!isDrawing) return; hasMoved = true;
                 const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
-                if(e.type !== 'mousemove') e.preventDefault();
+                // 阻止触摸滑动页面
+                if(e.cancelable) e.preventDefault(); 
             };
 
             const end = () => {
@@ -385,11 +414,9 @@
                     setTimeout(() => {
                         p1.style.display = 'none';
                         if (signOrder[0] === 'yang') {
-                            // 结局 A: 求签
                             const p3 = document.getElementById('page3');
                             p3.style.display = 'flex'; 
                         } else {
-                            // 结局 B: 爱心
                             const p2 = document.getElementById('page2');
                             p2.style.display = 'block';
                             initParticleHeart(); 
@@ -400,7 +427,7 @@
             }
         }
 
-        // --- 4. 求签逻辑 (修复版：去除了会导致大间距的 margin) ---
+        // --- 4. 求签逻辑 (智能字号版) ---
         let hasDrawn = false; 
         let isAnimating = false;
 
@@ -412,44 +439,32 @@
             const stick = document.getElementById('stick');
             const textEl = document.getElementById('stick-text');
 
-            // 重置
             stick.classList.remove('stick-rise');
             textEl.style.opacity = 0;
-            textEl.innerHTML = ""; // 清空内容
+            textEl.innerHTML = ""; 
             
-            // 摇晃
             container.classList.add('shake-anim');
 
             setTimeout(() => {
                 container.classList.remove('shake-anim');
-                
-                // 获取文案
                 let resultText = !hasDrawn ? FIRST_FORTUNE : RANDOM_FORTUNES[Math.floor(Math.random() * RANDOM_FORTUNES.length)];
                 if (!hasDrawn) hasDrawn = true;
                 
-                // === 核心逻辑：检测逗号并拆分 ===
                 if (resultText.includes("，") || resultText.includes(",")) {
-                    // 有逗号，拆分
                     const parts = resultText.split(/，|,/); 
                     if (parts.length >= 2) {
-                        // 动态调整字号，如果字数多就小一点
-                        if(parts[0].length > 5 || parts[1].length > 5) {
-                            textEl.style.fontSize = "0.85rem"; 
-                        } else {
-                            textEl.style.fontSize = "0.95rem";
-                        }
-                        // 插入HTML，注意这里去掉了之前的 margin-top
+                        // 智能字号：根据屏幕大小动态计算，避免溢出
+                        const baseSize = window.innerWidth < 500 ? 2.0 : 2.2; 
+                        textEl.style.fontSize = baseSize + "vmin"; 
                         textEl.innerHTML = `<span class="poem-line">${parts[0]}</span><span class="poem-line">${parts[1]}</span>`;
                     } else {
-                        textEl.style.fontSize = "1.2rem";
+                        textEl.style.fontSize = "2.8vmin";
                         textEl.innerText = resultText;
                     }
                 } else {
-                    // 无逗号，普通短语
-                    textEl.style.fontSize = "1.3rem";
+                    textEl.style.fontSize = "3.0vmin";
                     textEl.innerText = resultText;
                 }
-                // ==============================
 
                 stick.classList.add('stick-rise');
                 
@@ -460,40 +475,51 @@
             }, 1000); 
         }
 
-        // --- 5. 粒子爱心引擎 ---
+        // --- 5. 粒子爱心引擎 (高清适配版) ---
         function initParticleHeart() {
             var canvas = document.getElementById('heart-canvas');
             var ctx = canvas.getContext('2d');
             
-            var mobile = (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(((navigator.userAgent || navigator.vendor || window.opera)).toLowerCase()));
-            var koef = mobile ? 1.0 : 1.0; 
+            // 解决Canvas模糊，使用设备像素比
+            var dpr = window.devicePixelRatio || 1;
             
-            var width = canvas.width = koef * window.innerWidth;
-            var height = canvas.height = koef * window.innerHeight;
+            var width, height;
+            
+            var resize = function() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + "px";
+                canvas.style.height = height + "px";
+                ctx.scale(dpr, dpr);
+            }
+            resize();
+            window.addEventListener('resize', resize);
             
             var rand = Math.random;
-            
             var heartPosition = function (rad) {
                 return [Math.pow(Math.sin(rad), 3), -(15 * Math.cos(rad) - 5 * Math.cos(2 * rad) - 2 * Math.cos(3 * rad) - Math.cos(4 * rad))];
             };
-            
             var scaleAndTranslate = function (pos, sx, sy, dx, dy) {
                 return [dx + pos[0] * sx, dy + pos[1] * sy];
             };
 
-            window.addEventListener('resize', function () {
-                width = canvas.width = koef * window.innerWidth;
-                height = canvas.height = koef * window.innerHeight;
-            });
-
+            // 移动端粒子数量优化
+            var mobile = width < 600;
             var traceCount = mobile ? 20 : 50;
             var pointsOrigin = [];
             var i;
             var dr = mobile ? 0.3 : 0.1;
             
-            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 210, 13, 0, 0));
-            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 150, 9, 0, 0));
-            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 90, 5, 0, 0));
+            // 缩放系数调整：保证爱心在屏幕中间且大小合适
+            var heartScale = Math.min(width, height) / 800; // 动态计算缩放
+            var sx = 210 * heartScale; 
+            var sy = 13 * heartScale;
+
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), sx, sy, 0, 0));
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 150*heartScale, 9*heartScale, 0, 0));
+            for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 90*heartScale, 5*heartScale, 0, 0));
             
             var heartPointsCount = pointsOrigin.length;
             var targetPoints = [];
@@ -573,9 +599,7 @@
         }
 
         // --- 6. 情话弹幕逻辑 ---
-        const loveWords = [
-            "所愿皆所成"
-        ];
+        const loveWords = [ "所愿皆所成" ];
         
         function startRomanticExplosion() {
             const container = document.getElementById('words-container');
@@ -592,17 +616,19 @@
                 wordEl.classList.add('floating-word');
                 wordEl.innerText = loveWords[0]; 
 
+                // 随机位置使用百分比，适配所有屏幕
                 const randomTop = Math.random() * 95;
                 const randomLeft = Math.random() * 90;
 
-                // 防遮挡检测
-                if (randomTop > 20 && randomTop < 80 && randomLeft > 20 && randomLeft < 80) {
+                // 防遮挡检测 (中间区域透明)
+                if (randomTop > 25 && randomTop < 75 && randomLeft > 20 && randomLeft < 80) {
                     wordEl.classList.add('semi-transparent');
                 }
 
                 wordEl.style.top = randomTop + '%';
                 wordEl.style.left = randomLeft + '%';
-                wordEl.style.fontSize = (0.8 + Math.random() * 1.0) + 'rem';
+                // 字体大小也使用动态计算
+                wordEl.style.fontSize = (Math.random() * 2 + 1.5) + 'vmin';
                 
                 container.appendChild(wordEl);
                 count++;
