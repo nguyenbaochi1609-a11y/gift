@@ -2,13 +2,13 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>流芳·书赠玉笙</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>书赠玉笙</title>
     <style>
         /* --- 全局设置 --- */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #000;
+            overflow: hidden; background-color: #000; /* 背景设为黑色，作为黑边 */
             font-family: "KaiTi", "STKaiti", "楷体", serif;
             user-select: none; /* 禁止选中 */
             /* 禁止iOS点击高亮 */
@@ -23,15 +23,19 @@
             font-weight: bold;
         }
 
-        /* ================= 第一页：婚书 (智能缩放版) ================= */
+        /* ================= 第一页：婚书 (完整显示版) ================= */
         #page1 {
             position: absolute; width: 100%; height: 100%;
-            /* 保持背景充满屏幕，可能部分被裁剪，但保证美观 */
-            background: linear-gradient(135deg, #5e0a0a 0%, #3d0606 100%);
+            
+            /* 【核心修改】：背景图设置 */
+            background-color: #000; /* 底色黑色 */
             background-image: url('婚书背景图.jpg'); 
-            background-size: cover; 
-            background-position: center;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+            
+            /* change: cover -> contain，确保图片完整显示，不裁剪 */
+            background-size: contain; 
+            background-repeat: no-repeat;
+            background-position: center; /* 图片居中显示 */
+            
             z-index: 10;
             
             /* Flex 居中布局，确保内容永远在正中间 */
@@ -95,6 +99,8 @@
             width: 90%; 
             position: absolute; 
             bottom: 5vh; /* 距离底部 5% */
+            /* 适配全面屏底部安全区 */
+            padding-bottom: env(safe-area-inset-bottom);
             display: none; 
             flex-direction: column; 
             align-items: center; 
@@ -291,7 +297,7 @@
             "万事胜意", 
             "志得意满", 
             "意气风发",
-            "愿君千万岁，无岁不逢春",
+            "愿君千万岁，无岁不逢春", // 逗号已修复
             "天保定尔，俾尔戬穀。罄无不宜，受天百禄",
             "彩笔题桐叶，佳句问平安",
             "知君志不小，一举凌鸿鹄",
@@ -413,7 +419,6 @@
         function checkFinish() {
             if (fangSigned && yangSigned) {
                 // 【核心修改】这里设置等待 5000 毫秒（5秒）再开始跳转
-                // 给你足够的时间欣赏双签
                 setTimeout(() => {
                     const p1 = document.getElementById('page1');
                     p1.style.opacity = 0; 
@@ -429,7 +434,7 @@
                             startRomanticExplosion(); 
                         }
                     }, 2000); // 这是淡出动画的时间
-                }, 3000); // <--- 这里就是 5 秒等待时间
+                }, 5000); // <--- 这里就是 5 秒等待时间
             }
         }
 
@@ -628,6 +633,7 @@
 
                 wordEl.style.top = randomTop + '%';
                 wordEl.style.left = randomLeft + '%';
+                // 字体大小也使用动态计算
                 wordEl.style.fontSize = (Math.random() * 2 + 1.5) + 'vmin';
                 
                 container.appendChild(wordEl);
@@ -638,5 +644,3 @@
     </script>
 </body>
 </html>
-
-
