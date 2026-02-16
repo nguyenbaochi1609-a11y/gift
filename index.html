@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>书赠玉笙</title>
+    <title>流芳·书赠玉笙</title>
     <style>
         /* --- 全局设置 --- */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #000; /* 背景设为黑色，作为黑边 */
+            overflow: hidden; background-color: #000;
             font-family: "KaiTi", "STKaiti", "楷体", serif;
             user-select: none; /* 禁止选中 */
             /* 禁止iOS点击高亮 */
@@ -27,79 +27,78 @@
         #page1 {
             position: absolute; width: 100%; height: 100%;
             
-            /* 【核心修改】：背景图设置 */
-            background-color: #000; /* 底色黑色 */
+            /* 背景图完整显示设置 */
+            background-color: #000; 
             background-image: url('婚书背景图.jpg'); 
-            
-            /* change: cover -> contain，确保图片完整显示，不裁剪 */
-            background-size: contain; 
+            background-size: contain; /* 确保图片完整，可能有黑边 */
             background-repeat: no-repeat;
-            background-position: center; /* 图片居中显示 */
+            background-position: center; 
             
             z-index: 10;
             
-            /* Flex 居中布局，确保内容永远在正中间 */
+            /* Flex 居中布局 */
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: flex-start; /* 内容从上往下排 */
+            justify-content: flex-start; 
             
             transition: opacity 2s ease-in-out;
             cursor: pointer;
         }
 
-        /* 边框：使用 vmin 保证比例 */
+        /* 边框：【修改】全部使用 vmin，确保随宽度缩放 */
         .border-frame {
             position: absolute; 
-            top: 3vmin; bottom: 3vmin; left: 3vmin; right: 3vmin;
-            border: 0.4vmin solid #d4af37; /* 线条粗细也随屏幕缩放 */
-            border-radius: 2vmin; 
+            /* 距离边缘的距离也随屏幕宽度缩放 */
+            top: 4vmin; bottom: 4vmin; left: 4vmin; right: 4vmin;
+            /* 边框粗细 */
+            border: 0.5vmin solid #d4af37; 
+            /* 圆角大小 */
+            border-radius: 3vmin; 
             pointer-events: none; opacity: 0.6;
         }
+        /* 内层细边框 */
         .border-frame::after {
             content: ""; position: absolute; 
-            top: 1vmin; bottom: 1vmin; left: 1vmin; right: 1vmin;
+            top: 1.5vmin; bottom: 1.5vmin; left: 1.5vmin; right: 1.5vmin;
             border: 0.2vmin solid #d4af37; 
-            border-radius: 1vmin;
+            border-radius: 1.5vmin;
         }
 
-        /* 标题区：使用 vmin 控制字号 */
+        /* 标题区 */
         #title { 
-            /* 智能字号：屏幕宽高中较小边的 10% */
             font-size: 10vmin; 
-            margin-top: 8vh; /* 距离顶部 8% 视口高度 */
+            /* 距离顶部的位置，使用 vh 稍微兼顾高度 */
+            margin-top: 10vh; 
             margin-bottom: 2vh; 
             letter-spacing: 2vmin; 
         }
         
-        /* 正文区：核心布局调整 */
+        /* 正文区 */
         #text-container {
-            /* 宽度和高度都基于视口，保证在任何设备都不溢出 */
             width: 85vw; 
-            height: 60vh; 
+            height: 55vh; 
             
-            writing-mode: vertical-rl; /* 竖排文字 */
-            
-            /* 字体大小使用 vmin，手机上也不会太大 */
+            writing-mode: vertical-rl; 
             font-size: 3.5vmin; 
-            line-height: 6vmin; /* 行距 */
-            letter-spacing: 0.8vmin; /* 字距 */
+            line-height: 6vmin; 
+            letter-spacing: 0.8vmin; 
             
             text-align: left; 
             display: flex; 
             flex-wrap: wrap; 
-            align-content: center; /* 整体居中 */
+            align-content: center; 
             justify-content: center;
         }
 
         .line { opacity: 0; transition: opacity 1.5s ease; margin-left: 1.5vmin; }
 
-        /* 签名区 */
+        /* 签名区：【修改】核心优化，智能缩放 */
         #sign-section {
             width: 90%; 
             position: absolute; 
-            bottom: 5vh; /* 距离底部 5% */
-            /* 适配全面屏底部安全区 */
+            /* 使用 vmin 控制底部距离，避免在超长屏上掉得太低 */
+            bottom: 12vmin; 
             padding-bottom: env(safe-area-inset-bottom);
             display: none; 
             flex-direction: column; 
@@ -110,21 +109,34 @@
             display: flex; 
             justify-content: space-between; 
             width: 100%; 
-            max-width: 800px; /* 限制最大宽度，防止电脑上太开 */
-            padding: 0 2vmin; 
+            /* 限制最大宽度，保持手机观感 */
+            padding: 0 4vmin; 
             box-sizing: border-box; 
         }
-        .sign-box { width: 45%; display: flex; flex-direction: column; align-items: center; }
+        .sign-box { 
+            width: 42%; /* 左右各占 42% */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
         
         .canvas-wrap {
             width: 100%; 
-            height: 12vmin; /* 签名区域高度随屏幕变 */
-            min-height: 60px; /* 最小高度保底 */
+            /* 签字区高度加大，随宽度缩放 */
+            height: 16vmin; 
             background-color: transparent; 
-            border-bottom: 0.4vmin solid #d4af37; 
+            /* 下划线粗细 */
+            border-bottom: 0.5vmin solid #d4af37; 
         }
         canvas { width: 100%; height: 100%; cursor: crosshair; }
-        .sign-label { margin-top: 1vmin; font-size: 2.5vmin; opacity: 0.9; }
+        
+        /* 标签文字大小优化 */
+        .sign-label { 
+            margin-top: 2vmin; 
+            font-size: 3.5vmin; /* 字号加大，更清晰 */
+            opacity: 0.9; 
+            letter-spacing: 0.5vmin;
+        }
 
         /* ================= 第二页：粒子爱心 ================= */
         #page2 {
@@ -144,7 +156,7 @@
         
         .floating-word {
             position: absolute; color: #fff; 
-            font-size: 3vmin; /* 弹幕文字大小也随屏幕缩放 */
+            font-size: 3vmin; 
             text-shadow: 0 0 5px rgba(255,255,255,0.5);
             white-space: nowrap; 
             animation: textPop 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
@@ -168,14 +180,11 @@
             flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* 签筒容器：使用 vmin 控制整体大小 */
+        /* 签筒容器 */
         #lot-container {
             position: relative; 
-            /* 【核心修改】：不使用 px，使用 vmin */
-            /* 这样在 iPad (方屏) 和 手机 (长屏) 都能保持合适比例 */
             width: 30vmin;  
             height: 56vmin; 
-            
             margin-top: 5vmin; 
             cursor: pointer;
         }
@@ -191,7 +200,7 @@
         
         .cylinder-text {
             writing-mode: vertical-rl; 
-            font-size: 8vmin; /* 字体随容器缩放 */
+            font-size: 8vmin; 
             color: #3e2723;
             font-family: "KaiTi"; opacity: 0.7; 
             letter-spacing: 2vmin;
@@ -202,7 +211,7 @@
 
         #stick {
             position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
-            width: 28%; /* 相对筒宽 */
+            width: 28%; 
             height: 85%; 
             background: linear-gradient(90deg, #e0c38c 0%, #f5deb3 50%, #e0c38c 100%);
             background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px);
@@ -217,13 +226,10 @@
             writing-mode: vertical-rl; 
             display: flex; flex-direction: column; flex-wrap: wrap; 
             align-items: center; justify-content: center; 
-            gap: 1vmin; /* 行间距 */
-            
-            /* 字体动态调整 */
+            gap: 1vmin; 
             font-size: 2.2vmin; 
             font-weight: bold; 
             letter-spacing: 0.5vmin; 
-            
             opacity: 0; transition: opacity 0.5s;
             height: 90%; width: 100%; 
             color: #2b1b17; font-family: "KaiTi";
@@ -297,7 +303,7 @@
             "万事胜意", 
             "志得意满", 
             "意气风发",
-            "愿君千万岁，无岁不逢春", // 逗号已修复
+            "愿君千万岁，无岁不逢春", 
             "天保定尔，俾尔戬穀。罄无不宜，受天百禄",
             "彩笔题桐叶，佳句问平安",
             "知君志不小，一举凌鸿鹄",
@@ -355,7 +361,6 @@
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             
-            // 解决移动端 Canvas 模糊问题
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.parentElement.getBoundingClientRect();
             canvas.width = rect.width * dpr;
@@ -370,7 +375,7 @@
             ctx.lineJoin = "round";
 
             let isDrawing = false; 
-            let strokePoints = 0; // 【核心防误触】记录笔画点数
+            let strokePoints = 0; 
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
@@ -381,7 +386,7 @@
 
             const start = (e) => {
                 isDrawing = true; 
-                strokePoints = 0; // 每次下笔重置计数
+                strokePoints = 0; 
                 const pos = getPos(e);
                 ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
                 if(e.type !== 'mousedown') ; 
@@ -389,14 +394,13 @@
 
             const move = (e) => {
                 if (!isDrawing) return; 
-                strokePoints++; // 【核心防误触】开始计数
+                strokePoints++; 
                 const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke();
                 if(e.cancelable) e.preventDefault(); 
             };
 
             const end = () => {
-                // 【核心防误触】只有当连续移动了超过 20 个点时，才算真正签了名
-                // 这样如果不小心碰了一下（strokePoints 大概是 0-5），就不会触发
+                // 滑动超过 20 个单位才算签字
                 if (isDrawing && strokePoints > 20) {
                     if (userType === 'fang') fangSigned = true;
                     if (userType === 'yang') yangSigned = true;
@@ -415,10 +419,9 @@
             canvas.addEventListener('mouseleave', end);
         }
 
-        // --- 3. 结局分支判定 (延时优化版) ---
+        // --- 3. 结局分支判定 (5秒延时) ---
         function checkFinish() {
             if (fangSigned && yangSigned) {
-                // 【核心修改】这里设置等待 5000 毫秒（5秒）再开始跳转
                 setTimeout(() => {
                     const p1 = document.getElementById('page1');
                     p1.style.opacity = 0; 
@@ -433,8 +436,8 @@
                             initParticleHeart(); 
                             startRomanticExplosion(); 
                         }
-                    }, 2000); // 这是淡出动画的时间
-                }, 5000); // <--- 这里就是 5 秒等待时间
+                    }, 2000); 
+                }, 5000); 
             }
         }
 
@@ -490,7 +493,6 @@
             var canvas = document.getElementById('heart-canvas');
             var ctx = canvas.getContext('2d');
             
-            // 解决Canvas模糊
             var dpr = window.devicePixelRatio || 1;
             var width, height;
             
