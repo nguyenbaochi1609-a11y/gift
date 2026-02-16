@@ -128,7 +128,7 @@
         
         .canvas-wrap {
             width: 100%; 
-            height: clamp(60px, 10vh, 120px); /* 限制签字区域高度 */
+            height: clamp(70px, 20vh, 130px); /* 限制签字区域高度 */
             background-color: transparent; 
             border-bottom: 2px solid #d4af37; 
             margin-bottom: 5px;
@@ -415,7 +415,7 @@
                             startRomanticExplosion(); 
                         }
                     }, 2000); 
-                }, 5000); 
+                }, 3000); 
             }
         }
 
@@ -591,6 +591,7 @@
                 }
                 wordEl.style.top = randomTop + '%';
                 wordEl.style.left = randomLeft + '%';
+                wordEl.style.fontSize = (Math.random() * 1.5 + 1) + 'vmin';
                 container.appendChild(wordEl);
                 count++;
             }, 200); 
@@ -598,3 +599,4 @@
     </script>
 </body>
 </html>
+
