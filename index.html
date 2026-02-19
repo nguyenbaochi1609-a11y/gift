@@ -393,7 +393,7 @@
                     initParticleHeart(); 
                     startRomanticExplosion(); 
                 }, 1500); 
-            }, 5000); 
+            }, 7000); 
         }
 
         // --- 求签逻辑 (修复变量定义) ---
@@ -469,9 +469,10 @@
                 const randomTop = Math.random() * 95; const randomLeft = Math.random() * 90;
                 if (randomTop > 25 && randomTop < 75 && randomLeft > 20 && randomLeft < 80) { wordEl.classList.add('semi-transparent'); }
                 wordEl.style.top = randomTop + '%'; wordEl.style.left = randomLeft + '%';
-                wordEl.style.fontSize = (Math.random() * 1.0 + 0.8) + 'vmin'; container.appendChild(wordEl); count++;
+                wordEl.style.fontSize = (Math.random() * 1.5 + 1.0) + 'vmin'; container.appendChild(wordEl); count++;
             }, 200); 
         }
     </script>
 </body>
 </html>
+
